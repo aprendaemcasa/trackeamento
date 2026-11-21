@@ -1,0 +1,37 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+model Sale {
+ id String @id @default(cuid())
+ externalId String
+ provider String
+ product String
+ amount Float
+ currency String @default("BRL")
+ status String
+ email String?
+ eventId String?
+ source String?
+ campaign String?
+ adId String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@unique([provider,externalId])
+ @@index([createdAt])
+ @@index([status])
+ @@index([campaign])
+}
+model TrackingEvent {
+ id String @id @default(cuid())
+ eventId String @unique
+ type String
+ url String?
+ referrer String?
+ source String?
+ medium String?
+ campaign String?
+ content String?
+ visitorId String?
+ createdAt DateTime @default(now())
+ @@index([createdAt])
+ @@index([visitorId])
+}
