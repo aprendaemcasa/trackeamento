@@ -1,0 +1,1 @@
+import {readFile} from "node:fs/promises";import {join} from "node:path";export async function GET(){const body=await readFile(join(process.cwd(),"public","tracking.js"),"utf8");return new Response(body,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"public, max-age=300","Access-Control-Allow-Origin":"*"}});}
