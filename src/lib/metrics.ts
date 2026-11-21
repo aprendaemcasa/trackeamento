@@ -1,3 +1,2 @@
-export type SaleLike={amount:number;status:string};
-export function metrics(s:SaleLike[],spend=0){const ok=s.filter(x=>x.status==="APPROVED");const revenue=ok.reduce((a,x)=>a+x.amount,0);return{revenue,spend,profit:revenue-spend,sales:ok.length,roas:spend?revenue/spend:0,cpa:ok.length?spend/ok.length:0};}
-export const brl=(n:number)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(n);
+export function metrics(s:{amount:number;status:string}[],spend=0){const ok=s.filter(x=>x.status==="APPROVED");const revenue=ok.reduce((a,x)=>a+x.amount,0);return{revenue,spend,profit:revenue-spend,sales:ok.length,roas:spend?revenue/spend:0,cpa:ok.length?spend/ok.length:0};}
+export const brl=(v:number)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v);
