@@ -1,0 +1,5 @@
+"use client";
+import Link from "next/link";import {usePathname} from "next/navigation";
+const links=[["/","◫ Dashboard"],["/sales","▤ Vendas"],["/tracking","⌁ Rastreamento"],["/campaigns","▥ Campanhas"],["/products","□ Produtos"],["/integrations","⇄ Integrações"],["/settings","⚙ Configurações"]];
+export function Shell({children}:{children:React.ReactNode}){const path=usePathname();return <div className="shell"><aside className="sidebar"><Link href="/" className="brand"><span className="mark">↗</span> TRACKER<b>PRO</b></Link><div><div className="navtitle">WORKSPACE</div><nav className="nav">{links.map(([href,label])=><Link key={href} href={href} className={path===href?"active":""}>{label}</Link>)}</nav></div><div className="sidebarfoot">TRACKING PRÓPRIO<br/>Seus dados de vendas em um só lugar.</div></aside><main className="main">{children}</main></div>;}
+export function Header({tag,title,desc}:{tag:string;title:string;desc:string}){return <header className="top"><div><div className="eyebrow">{tag}</div><h1>{title}</h1><div className="sub">{desc}</div></div><span className="pill">● Sistema operacional</span></header>;}
