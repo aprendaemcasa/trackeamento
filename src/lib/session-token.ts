@@ -1,0 +1,5 @@
+const encoder = new TextEncoder();
+function toBase64(bytes: Uint8Array) { let binary = ""; for (const byte of bytes) binary += String.fromCharCode(byte); return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+async function signature(value: string) { const secret = process.env.SESSION_SECRET; if (!secret) throw new Error("SESSION_SECRET não configurado"); const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]); return toBase64(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(value)))); }
+export async function createSessionToken() { const expires = Date.now() + 7 * 24 * 60 * 60 * 1000; const payload = String(expires); return payload + "." + await signature(payload); }
+export async function verifySessionToken(token?: string) { if (!token) return false; const [expires, sig] = token.split("."); if (!expires || !sig || !/^\d+$/.test(expires) || Number(expires) < Date.now()) return false; try { return sig === await signature(expires); } catch { return false; } }
