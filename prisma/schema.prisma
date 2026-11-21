@@ -1,57 +1,96 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model Sale {
- id String @id @default(cuid())
- externalId String
- provider String
- product String
- amount Float
- currency String @default("BRL")
- status String
- email String?
- eventId String?
- source String?
- campaign String?
- adId String?
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
- @@unique([provider,externalId])
- @@index([createdAt])
- @@index([status])
- @@index([campaign])
+  id         String   @id @default(cuid())
+  externalId String
+  provider   String
+  product    String
+  amount     Float
+  currency   String   @default("BRL")
+  status     String
+  email      String?
+  eventId    String?
+  source     String?
+  campaign   String?
+  adId       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([provider, externalId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([campaign])
 }
+
 model TrackingEvent {
- id String @id @default(cuid())
- eventId String @unique
- type String
- url String?
- referrer String?
- source String?
- medium String?
- campaign String?
- content String?
- visitorId String?
- createdAt DateTime @default(now())
- @@index([createdAt])
- @@index([visitorId])
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  type      String
+  url       String?
+  referrer  String?
+  source    String?
+  medium    String?
+  campaign  String?
+  content   String?
+  visitorId String?
+  adId      String?
+  fbclid    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorId])
+  @@index([campaign])
 }
+
 model Lead {
- id String @id @default(cuid())
- trackingId String @unique
- phone String?
- name String?
- status String @default("NEW")
- amount Float?
- paymentReference String?
- source String?
- medium String?
- campaign String?
- content String?
- adId String?
- fbclid String?
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
- @@index([status])
- @@index([createdAt])
- @@index([campaign])
+  id               String   @id @default(cuid())
+  trackingId       String   @unique
+  phone            String?
+  name             String?
+  status           String   @default("NEW")
+  amount           Float?
+  paymentReference String?
+  source           String?
+  medium           String?
+  campaign         String?
+  content          String?
+  adId             String?
+  fbclid           String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([campaign])
+}
+
+model AdSpend {
+  id        String   @id @default(cuid())
+  platform  String   @default("Meta Ads")
+  campaign  String?
+  amount    Float
+  spendDate DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([spendDate])
+  @@index([campaign])
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  price     Float?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
 }
