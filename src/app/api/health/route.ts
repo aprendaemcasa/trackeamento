@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";export async function GET(){return NextResponse.json({ok:true,service:"tracker-pro",database:process.env.DATABASE_URL?"configured":"memory-mode",timestamp:new Date().toISOString()});}
