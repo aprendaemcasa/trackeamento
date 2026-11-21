@@ -1,47 +1,58 @@
 # Tracker Pro
+MVP de tracking para vendas originadas em anúncios e fechadas pelo WhatsApp Business.
 
-MVP próprio de tracking de visitas e vendas.
+## Fluxo previsto
+Meta Ads → link rastreável do Tracker Pro → WhatsApp Business/Leona → Pix na chave própria → confirmação confiável → venda registrada.
 
-## Implementado
-- Dashboard de vendas e page views.
-- Script JS com UTMs e page views.
-- API POST /api/tracking.
-- Webhook universal POST /api/webhooks/:provider.
-- Validação com x-webhook-secret.
-- Idempotência por provedor + pedido.
-- Persistência PostgreSQL com Prisma; memória temporária se DATABASE_URL não estiver definida.
+## Funcionalidades incluídas
+- Dashboard e histórico de vendas.
+- Cadastro de leads via redirecionador /go/whatsapp.
+- Identificador tracking_id enviado no texto inicial da conversa.
+- UTMs guardadas no lead.
+- Tela de leads e status.
+- Endpoint genérico POST /api/webhooks/leona para receber atualizações da Leona ou de uma automação intermediária.
+- Webhook protegido por x-webhook-secret.
+- PostgreSQL via Prisma; modo memória apenas para testes locais.
 
-## Rodar
+## Configuração
 Node.js 20.9+ e PostgreSQL:
+```bash
+npm install
+cp .env.example .env
+npx prisma generate
+npx prisma db push
+npm run dev
+```
+Variáveis: DATABASE_URL, WEBHOOK_SECRET, NEXT_PUBLIC_TRACKING_ORIGIN e WHATSAPP_NUMBER (número com DDI e DDD, somente dígitos, sem +).
 
-    npm install
-    cp .env.example .env
-    # Configure DATABASE_URL e WEBHOOK_SECRET
-    npx prisma generate
-    npx prisma db push
-    npm run dev
+## Link de anúncio
+Use:
+`https://SEU-DOMINIO.com/go/whatsapp?utm_source=facebook&utm_medium=paid_social&utm_campaign=nome_da_campanha`
+O link cria um lead e redireciona para wa.me com uma referência TP no texto. Use um link diferente por campanha/conjunto/anúncio e acrescente utm_content ou ad_id.
 
-Acesse http://localhost:3000.
+## Webhook de eventos da Leona
+POST `/api/webhooks/leona`
+Header `x-webhook-secret: SEU_SEGREDO`
 
-## Instalar tracking
-    <script defer src="https://SEU-DOMINIO.com/tracking.js" data-endpoint="https://SEU-DOMINIO.com/api/tracking"></script>
+Evento de atualização de lead:
+```json
+{"event_type":"LEAD_UPDATED","tracking_id":"tp_ID","name":"Cliente","phone":"5511999999999"}
+```
+Pagamento confirmado (somente após confirmação real do Pix):
+```json
+{"event_type":"PAYMENT_CONFIRMED","tracking_id":"tp_ID","order_id":"pedido_123","amount":9.90,"payment_reference":"e2e_id","product_name":"Produto"}
+```
+Estorno:
+```json
+{"event_type":"PAYMENT_REFUNDED","tracking_id":"tp_ID","order_id":"pedido_123","amount":9.90}
+```
 
-Captura utm_source, utm_medium, utm_campaign, utm_content, fbclid, URL, referenciador e ID aleatório local. Configure consentimento e transparência LGPD antes de ativar tracking.
+## Importante sobre Pix e Leona
+A chave Pix/QR Code própria não envia confirmação automaticamente ao Tracker Pro. Para marcar PAID automaticamente, a Leona precisa disponibilizar webhook/API que informe o pagamento confirmado, ou deve existir integração com o banco/provedor que recebeu o Pix. O endpoint acima é o contrato de entrada; ainda é necessário configurar o envio no painel da Leona ou implementar um adaptador específico quando a documentação real estiver disponível. Não marque como pago com base em mensagem do comprador ou comprovante enviado por imagem.
 
-## Webhook universal
-POST https://SEU-DOMINIO.com/api/webhooks/cakto
-Header x-webhook-secret: seu segredo
-
-    {"event_id":"evt_123","order_id":"pedido_123","product_name":"Guia de Portão","amount":9.90,"currency":"BRL","status":"APPROVED","customer_email":"cliente@example.com","source":"facebook","campaign":"campanha_novembro","ad_id":"anuncio_03"}
-
-Status aceitos: APPROVED, PENDING, REFUNDED, CHARGEBACK, CANCELED.
-
-## Ainda não integrado
-O endpoint aceita payload normalizado, não é integração nativa validada de Cakto/Hotmart/Kiwify. Cada adapter precisa mapear o schema e validar a assinatura oficial do provedor. Meta Ads e Conversions API ainda não estão conectadas. O painel não inventa gasto ou ROAS sem dados de anúncios.
-
-## Segurança / limitações
-- Não há login nesta entrega: mantenha deployment privado/protegido.
-- Configure segredo forte, HTTPS, rate limiting, logs e retentativas antes da produção.
-- Não exponha tokens no navegador.
-- Valores usam Float neste protótipo; migrar para Decimal antes de operação financeira.
-- Sem DATABASE_URL, dados de teste em memória desaparecem ao reiniciar.
+## Limitações e segurança
+- O formato genérico não significa integração nativa já validada com a Leona. O evento precisa ser mapeado e testado com a documentação real da ferramenta.
+- Link de WhatsApp rastreia clique e referência incluída no texto, mas não prova que a conversa foi iniciada ou que o contato veio daquele anúncio. O lead só pode ser conciliado se a referência chegar à automação.
+- Sem login, não exponha o painel publicamente em produção. Use HTTPS, autenticação, rate limiting, logs e segredo forte.
+- Dados em memória desaparecem ao reiniciar; configure PostgreSQL.
+- Trate dados pessoais com minimização, transparência e base legal adequada conforme LGPD.
