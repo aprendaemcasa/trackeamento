@@ -13,8 +13,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: npx prisma generate
-      - run: npm run build
+      - run: npm run build:cloudflare
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/tracker?schema=public
           WEBHOOK_SECRET: ci-test-secret
