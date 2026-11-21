@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";
+import {timingSafeEqual} from "node:crypto";
+import {createSessionToken} from "@/lib/session-token";
+export async function POST(req:Request){try{const {password}=await req.json();const expected=process.env.ADMIN_PASSWORD??"";if(!expected||typeof password!=="string")return NextResponse.json({ok:false,error:"Configure ADMIN_PASSWORD no servidor."},{status:503});const a=Buffer.from(expected),b=Buffer.from(password);if(a.length!==b.length||!timingSafeEqual(a,b))return NextResponse.json({ok:false,error:"Senha incorreta."},{status:401});const token=await createSessionToken();const res=NextResponse.json({ok:true});res.cookies.set("tracker_session",token,{httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"strict",path:"/",maxAge:7*24*60*60});return res;}catch{return NextResponse.json({ok:false,error:"Não foi possível entrar."},{status:400});}}
