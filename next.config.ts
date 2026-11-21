@@ -1,2 +1,10 @@
 import type { NextConfig } from "next";
-const config:NextConfig={poweredByHeader:false};export default config;
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+const config: NextConfig = {
+  poweredByHeader: false,
+};
+
+initOpenNextCloudflareForDev();
+
+export default config;
