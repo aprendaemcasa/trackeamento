@@ -1,0 +1,2 @@
+import {timingSafeEqual} from "node:crypto";
+export function authorized(r:Request){const secret=process.env.WEBHOOK_SECRET;if(!secret)return process.env.NODE_ENV!=="production";const got=r.headers.get("x-webhook-secret")??"";const a=Buffer.from(secret),b=Buffer.from(got);return a.length===b.length&&timingSafeEqual(a,b);}
